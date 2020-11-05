@@ -1,8 +1,14 @@
 const searchInput = document.getElementById("search");
 const resultBoard = document.getElementById("results");
+const filterSelect = document.getElementById("char");
+
+let filters = {
+  name: "",
+  temperament: "",
+};
 
 //create cards function
-const createCard = (dogName, breedFor, breedGroup, lifeSpan) => {
+const createCard = (dogName, breedFor, breedGroup, lifeSpan, imageUrl) => {
   //create card
   let card = document.createElement("div");
   card.className = "card";
@@ -10,6 +16,7 @@ const createCard = (dogName, breedFor, breedGroup, lifeSpan) => {
   //image
   let cardImage = document.createElement("div");
   cardImage.className = "card__image";
+  cardImage.style.backgroundImage = `url(${imageUrl})`;
 
   //content
   let cardContent = document.createElement("div");
@@ -26,7 +33,7 @@ const createCard = (dogName, breedFor, breedGroup, lifeSpan) => {
   cardContent.appendChild(p);
 
   //add elements to card
-  //   card.appendChild(cardImage);
+  card.appendChild(cardImage);
   card.appendChild(cardContent);
 
   return card;
@@ -40,7 +47,8 @@ const printCards = (arr) => {
         el.breeds[0].name,
         el.breeds[0].bred_for,
         el.breeds[0].breed_group,
-        el.breeds[0].life_span
+        el.breeds[0].life_span,
+        el.url
       )
     );
   });
@@ -64,13 +72,18 @@ const debounce = (func, wait) => {
   };
 };
 
-//handle input search
-const handleSearch = debounce(() => {
+//filter data by filters
+const filterData = () => {
   //clear results board
   resultBoard.innerHTML = "";
-
+  //by name from search
   let searchResults = data.filter((el) => {
-    return el.breeds[0].name.toLowerCase().includes(searchInput.value);
+    return (
+      el.breeds[0].name.toLowerCase().includes(filters.name.toLowerCase()) &&
+      el.breeds[0].temperament
+        .toLowerCase()
+        .includes(filters.temperament.toLowerCase())
+    );
   });
 
   if (searchResults.length > 0) {
@@ -82,6 +95,20 @@ const handleSearch = debounce(() => {
     h3.innerText = "No dogs";
     resultBoard.appendChild(h3);
   }
+};
+
+//handle input search
+const handleSearch = debounce(() => {
+  filters.name = searchInput.value;
+
+  //filter data
+  filterData();
 }, 250);
 
 searchInput.addEventListener("keyup", handleSearch);
+filterSelect.addEventListener("change", (e) => {
+  filters.temperament = e.target.value;
+
+  //filter data
+  filterData();
+});
